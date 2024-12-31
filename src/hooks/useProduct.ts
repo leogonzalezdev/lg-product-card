@@ -9,15 +9,18 @@ interface useProductArgs {
 }
 
 
-export const useProduct = ({ onChange, product, value = 0, initialValues }: useProductArgs) => {
+export const useProduct = ({ onChange, product, value = 0, initialValues = {} }: useProductArgs) => {
+  const initialCount = initialValues && initialValues.count !== undefined 
+    ? initialValues.count 
+    : value;
 
-  const [counter, setCounter] = useState<number>(initialValues?.count || value);
+  const [counter, setCounter] = useState<number>(initialCount || value);
   const isMounted = useRef<boolean>(false);
 
   const increaseBy = (value: number) => {
     let newValue = Math.max(counter + value, 0);
 
-    if (initialValues?.maxCount) {
+    if (initialValues && initialValues.maxCount) {
       newValue = Math.min(newValue, initialValues.maxCount)
     }
 
@@ -26,7 +29,7 @@ export const useProduct = ({ onChange, product, value = 0, initialValues }: useP
   }
   
   const reset = () => {
-    setCounter(initialValues?.count || value)
+    setCounter(initialValues && initialValues.count !== undefined ? initialValues.count : value)
   }
 
   useEffect(() => {
@@ -40,9 +43,9 @@ export const useProduct = ({ onChange, product, value = 0, initialValues }: useP
 
   return {
     counter,
-    isMaxCountReached: !!initialValues?.maxCount && initialValues.maxCount === counter,
-    maxCount: initialValues?.maxCount,
-    
+    isMaxCountReached: initialValues && initialValues.maxCount ? initialValues.maxCount === counter : false,
+    // eslint-disable-next-line no-mixed-operators
+    maxCount: initialValues && initialValues.maxCount || undefined,
     increaseBy,
     reset
   }
